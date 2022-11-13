@@ -1,0 +1,100 @@
+---
+title: "Business Analytics assignment 3"
+author: "Khutso Ledwaba"
+date: "2022-11-10"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Question 1
+```{r}
+set.seed(2017)
+X=runif(100)*10
+Y=X*4+3.45
+Y=rnorm(100)*0.29*Y+Y
+
+#A)Plot Y against X. Include a screenshot of the plot in your submission. Using the File menu you can save the graph as a picture on your computer. Based on the plot do you think we can fit a linear model to explain Y based on X?
+plot(Y~X,xlab='X',ylab='Y',col='green')
+abline(lsfit(X, Y),col = "blue")
+ 
+#B)Construct a simple linear model of Y based on X. Write the equation that explains Y based on X. What is the accuracy of this model?
+
+Y=4.4655+3.6108*X
+# The accuracy is 65%
+line_fit <- lm(Y ~ X)
+summary(line_fit)
+
+# C)How the Coefficient of Determination, R2, of the model above is related to the correlation coefficient of X and Y?
+cor(X,Y)^2
+
+#The square of correlation coefficient is same as coefficient of determination which is 65.17% 
+```
+
+#Question 2
+```{r}
+head(mtcars)
+
+#A)James wants to buy a car. He and his friend, Chris, have different opinions about the Horse Power (hp) of cars. James think the weight of a car (wt) can be used to estimate the Horse Power of the car while Chris thinks the fuel consumption expressed in Mile Per Gallon (mpg), is a better estimator of the (hp). Who do you think is right? Construct simple linear models using mtcars data to answer the question.
+
+plot(mtcars$hp~mtcars$wt,xlab='Weight',ylab='HP',col='yellow')
+abline(lsfit(mtcars$wt,mtcars$hp),col = "green")
+JamesModel<-lm(formula =hp~wt, data = mtcars )
+summary(JamesModel)
+
+plot(mtcars$hp~mtcars$mpg,xlab='MPG',ylab='HP',col='red')
+abline(lsfit(mtcars$mpg, mtcars$hp),col = "blue")
+ChrisModel<-lm(formula =hp~mpg, data = mtcars )
+summary(ChrisModel)
+
+#James' estimation is 43%, while Chris estimation is 60%. Therefore Chris is correct.
+
+#B)Build a model that uses the number of cylinders (cyl) and the mile per gallon (mpg) values of a car to predict the car Horse Power (hp). Using this model, what is the estimated Horse Power of a car with 4 calendar and mpg of 22
+
+HpModel<-lm(hp~cyl+mpg,data = mtcars)
+summary(HpModel)
+estimated_HP<-predict(HpModel,data.frame(cyl=4,mpg=22))
+estimated_HP
+predict(HpModel,data.frame(cyl=4,mpg=22),interval = "prediction",level = 0.85)
+```
+
+#Question 3
+```{r}
+#call package mlbench
+library(mlbench)
+data(BostonHousing)
+str(BostonHousing)
+
+#boxplot of values
+boxplot(BostonHousing[,c(1,2,4,11,14)])
+
+#A) Build a model to estimate the median value of owner-occupied homes (medv)based on the following variables: crime crate (crim), proportion of residential land zoned for lots over 25,000 sq.ft (zn), the local pupil-teacher ratio (ptratio) and weather the whether the tract bounds Chas River(chas). Is this an accurate model?
+
+set.seed(123)
+MModel<-lm(medv~crim+zn+ptratio+chas,data = BostonHousing)
+summary(MModel)
+
+#No the model has an accuracy of 36% and is therefore not accurate enough.
+
+#B) Use the estimated coefficient to answer these questions? 
+#I). Imagine two houses that are identical in all aspects but one bounds the Chas River and the other does not. Which one is more expensive and by how much? (8% of total points)
+
+# The Chas1 bound river has a coefficient of 4.583 and the median value of the homes are in the 1000s. Therefore when you multiply the two together, the product is $4,583.93 which is the more expensive.
+
+
+#C) Which of the variables are statistically important (i.e. related to the house price)? Hint: use the p-values of the coefficients to answer
+
+#Yes, the p-values of all the variables are not equal to zero that means that we can very comfortably reject the default null hypothesis i.e. there is no relationship between House price and other variables in the model. Hence, all the variables are statistically important.
+
+#Statistically, all the variables are important because none of the p-values equal to zero which proves there is a relationship between the house price and the variables.
+
+# D) Use the anova analysis and determine the order of importance of these four variables. (18% of total points)
+anova(MModel)
+
+
+#The order of importance is crim, ptratio,zn, chas. Because the sum squared value of the crim is way higher than the rest, followed by the ptratio, zn and then chas
+```
